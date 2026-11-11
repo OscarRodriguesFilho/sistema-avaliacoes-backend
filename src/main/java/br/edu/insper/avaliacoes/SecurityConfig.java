@@ -34,7 +34,7 @@ public class SecurityConfig {
         converter.setJwtGrantedAuthoritiesConverter(authorities()); return converter;
     }
     private Converter<Jwt, Collection<GrantedAuthority>> authorities() {
-        return Stream.of("https://avaliacoes.insper.br/roles", "permissions", "scope")
+        return jwt -> Stream.of("https://avaliacoes.insper.br/roles", "permissions", "scope")
             .flatMap(claim -> claimValues(jwt, claim).stream())
             .filter(role -> role.equalsIgnoreCase("ADMIN") || role.equalsIgnoreCase("USER"))
             .map(role -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
