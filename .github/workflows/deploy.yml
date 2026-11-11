@@ -13,11 +13,13 @@ jobs:
       - run: mvn -B verify
   deploy:
     needs: test
-    if: ${{ secrets.EC2_HOST != '' }}
     runs-on: ubuntu-latest
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
     steps:
       - uses: actions/checkout@v4
       - uses: appleboy/scp-action@v0.1.7
+        if: env.EC2_HOST != ''
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
@@ -25,6 +27,7 @@ jobs:
           source: "Dockerfile,docker-compose.yml,pom.xml,src"
           target: /home/ubuntu/sistema-avaliacoes-backend
       - uses: appleboy/ssh-action@v1.2.0
+        if: env.EC2_HOST != ''
         env:
           POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
           AUTH0_ISSUER_URI: ${{ secrets.AUTH0_ISSUER_URI }}
