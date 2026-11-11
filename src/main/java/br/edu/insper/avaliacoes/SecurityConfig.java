@@ -34,8 +34,11 @@ public class SecurityConfig {
         converter.setJwtGrantedAuthoritiesConverter(authorities()); return converter;
     }
     private Converter<Jwt, Collection<GrantedAuthority>> authorities() {
-        return jwt -> Stream.concat(claimValues(jwt, "https://avaliacoes.insper.br/roles").stream(), claimValues(jwt, "permissions").stream())
-            .map(role -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + role.toUpperCase())).toList();
+        return Stream.of("https://avaliacoes.insper.br/roles", "permissions", "scope")
+            .flatMap(claim -> claimValues(jwt, claim).stream())
+            .filter(role -> role.equalsIgnoreCase("ADMIN") || role.equalsIgnoreCase("USER"))
+            .map(role -> (GrantedAuthority) new SimpleGrantedAuthority("ROLE_" + role.toUpperCase()))
+            .toList();
     }
     private List<String> claimValues(Jwt jwt, String name) {
         Object value = jwt.getClaim(name);
